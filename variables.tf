@@ -12,9 +12,13 @@ variable "zones" {
 }
 
 # Define the list of server names
+
+/*
+you need to give server name like the below. if not its wont work.
+haproxy, k8s-master-1,k8s-master-2, k8s-master-3, k8s-worker-1, k8s-worker-2, k8s-worker-3
+*/
 variable "server_names" {
   type    = list(string)
-  #default = ["k8s-master-1", "k8s-master-2", "k8s-master-3", "worker-1"]
   default = ["haproxy", "k8s-master-1", "k8s-master-2"]
 }
 
@@ -28,3 +32,17 @@ variable "memory" {
   type    = number
   default = 4  # Default to 4GB memory
 }
+
+variable "private_ips" {
+  type = map(string)
+  default = {
+    "haproxy"       = "10.128.0.2"
+    "k8s-master-1"  = "10.128.0.3"
+    "k8s-master-2"  = "10.128.0.4"
+    "k8s-master-3"  = "10.128.0.5"
+    "k8s-worker-1"  = "10.128.0.6"
+    "k8s-worker-2"  = "10.128.0.7"
+    "k8s-worker-3"  = "10.128.0.8"
+  }
+}
+
