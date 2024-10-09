@@ -2,7 +2,7 @@
 resource "google_compute_instance" "k8s-infra" {
   for_each     = toset(var.server_names)
   name         = each.value
-  zone         = "us-central1-a"
+  zone         = var.zones[each.value]
 
   # Custom machine type created using CPU and memory values
   machine_type = "custom-${var.cpu}-${var.memory * 1024}"  # Memory is specified in MB
@@ -20,7 +20,14 @@ resource "google_compute_instance" "k8s-infra" {
     access_config {
       // This block provides the external IP
     }
+
   }
-
-
+  # Install Docker on VMs with names starting with 'worker-'
+  metadata_startup_script = (
+  startswith(each.value, "haproxy") ? file("./haproxy.sh") :
+  startswith(each.value, "k8s-master-") ? file("./kube_master_prep.sh") :
+  startswith(each.value, "k8s-worker-") ? file("./kube_worker_prep.sh") :
+  null  # Fallback if no match
+  )
 }
+
