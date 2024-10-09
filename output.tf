@@ -5,6 +5,7 @@ output "server_info" {
     {
       name = instance.name
       type = instance.machine_type
+      zone= instance.zone
     }
   ]
 }
