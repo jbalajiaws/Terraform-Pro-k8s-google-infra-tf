@@ -9,13 +9,13 @@ sudo systemctl stop firewalld
 sudo systemctl disable firewalld
 
 sudo cat <<EOT >> /etc/hosts
- 10.128.0.1  haproxy
- 10.128.0.1  k8s-master-1
- 10.128.0.1  k8s-master-2
- 10.128.0.1  k8s-master-3
- 10.128.0.1  k8s-worker-1
- 10.128.0.1  k8s-worker-2
- 10.128.0.1  k8s-worker-3
+ 10.128.0.2  haproxy
+ 10.128.0.3  k8s-master-1
+ 10.128.0.4  k8s-master-2
+ 10.128.0.5  k8s-master-3
+ 10.128.0.6  k8s-worker-1
+ 10.128.0.7  k8s-worker-2
+ 10.128.0.8  k8s-worker-3
 EOT
 
 #Docker Installation
@@ -29,33 +29,18 @@ sudo yum remove docker \
                   docker-engine
 sudo yum install -y yum-utils
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-sudo systemctl start docker
-sudo systemctl enable docker
+sudo yum install containerd.io  -y
+sudo systemctl start containerd
+sudo systemctl enable containerd
 
-# Set up the Docker daemon
-sudo su -
-sudo cat > /etc/docker/daemon.json <<EOF
-{
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "100m"
-  },
-  "storage-driver": "overlay2"
-}
-EOF
+# Set up the containerd config
+sudo mkdir /etc/containerd
+sudo containerd config default | tee /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 
-
-
-# Restart Docker
-sudo systemctl daemon-reload
-sudo systemctl restart docker
-sudo systemctl enable docker
-sudo systemctl start docker
+systemctl restart containerd
 
 #netfilter config
-
 sudo modprobe br_netfilter
 sudo echo 1 > /proc/sys/net/ipv4/ip_forward
 
@@ -80,4 +65,8 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward = 1
 EOT
+
+
+sudo sudo yum install nmap-ncat -y  #installing netcat tool
+
 
