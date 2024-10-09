@@ -8,13 +8,13 @@ sudo systemctl stop firewalld
 sudo systemctl disable firewalld
 
 sudo cat <<EOT >> /etc/hosts
- 10.128.0.1  haproxy
- 10.128.0.1  k8s-master-1
- 10.128.0.1  k8s-master-2
- 10.128.0.1  k8s-master-3
- 10.128.0.1  k8s-worker-1
- 10.128.0.1  k8s-worker-2
- 10.128.0.1  k8s-worker-3
+ 10.128.0.2  haproxy
+ 10.128.0.3  k8s-master-1
+ 10.128.0.4  k8s-master-2
+ 10.128.0.5  k8s-master-3
+ 10.128.0.6  k8s-worker-1
+ 10.128.0.7  k8s-worker-2
+ 10.128.0.8  k8s-worker-3
 EOT
 
 sudo yum install haproxy -y
@@ -53,8 +53,11 @@ backend kube-apiserver
     option tcp-check
     balance roundrobin
     default-server inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100
-    server kube-master1 "CHANGE-ME":6443 check # Replace the IP address without quotes.
-    server kube-master2 "CHANGE-ME":6443 check # Replace the IP address without quotes.
-    server kube-master3 "CHANGE-ME":6443 check # Replace the IP address without quotes.
+    server k8s-master-1 10.128.0.3:6443 check # Replace the IP address without quotes.
+    server k8s-master-2 10.128.0.4:6443 check # Replace the IP address without quotes.
+    server k8s-master-3 10.128.0.5:6443 check # Replace the IP address without quotes.
 EOT
 
+sudo systemctl restart haproxy
+
+sudo sudo yum install nmap-ncat -y #installing net cat tool

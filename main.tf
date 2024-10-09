@@ -20,6 +20,8 @@ resource "google_compute_instance" "k8s-infra" {
     access_config {
       // This block provides the external IP
     }
+# Assign the custom private IP from the mapping
+    network_ip = lookup(var.private_ips, each.value, null)
 
   }
   # Install Docker on VMs with names starting with 'worker-'
